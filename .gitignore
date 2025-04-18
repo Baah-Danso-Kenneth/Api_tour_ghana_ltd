@@ -1,4 +1,5 @@
 # Ignore Python compiled files
+.idea/
 __pycache__/
 *.py[cod]
 *$py.class
