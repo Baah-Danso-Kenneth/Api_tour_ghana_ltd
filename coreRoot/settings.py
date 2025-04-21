@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'core.users',
     'core.auth',
     'core.experiences',
+    'core.shops',
+    'core.payments',
 
     #Thirdparty apps
     'rest_framework',
