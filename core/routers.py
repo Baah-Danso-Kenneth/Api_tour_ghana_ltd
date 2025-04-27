@@ -7,7 +7,11 @@ from core.experiences.viewsets import TourGuideViewSet
 from core.payments.viewsets import LightningPaymentViewset, OrderViewSet
 from core.shops.viewsets import ProductViewSet
 from core.users.viewsets import UserViewSet
-
+from .experiences.viewsets import ( ExperienceViewSet, RecommendationViewSet,
+                                    ItineraryViewSet, TourGuideViewSet, LocationDetailsViewSet,
+                                    TripBatchViewSet, HistoricalInfoViewSet, AccommodationViewSet,
+                                    IncludedItemViewSet, NotIncludedItemViewSet,
+                                    )
 
 router = routers.SimpleRouter()
 

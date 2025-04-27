@@ -1,13 +1,14 @@
 from rest_framework import viewsets
 from .serializer import (ExperienceSerializer, ExperienceDetailSerializer,
                          NotIncludedItemSerializer, IncludedItemSerializer,
-                         TourGuideSerializer, TripBatchSerializer,
-                          RecommendationSerializer, LocationDetailSerializer
+                         TourGuideSerializer, TripBatchSerializer,AccommodationSerializer,
+                          RecommendationSerializer, LocationDetailSerializer, ItinerarySerializer,
+                          HistoricalInfoSerializer
                          )
 
 from .models import (Experience, NotIncludedItem,
                      TourGuide, HistoricalInfo,
-                     Recommendation, Itinerary,
+                     Recommendation, Itinerary,Accommodation,
                      IncludedItem, TripBatch, LocationDetails)
 
 class ExperienceViewSet(viewsets.ModelViewSet):
@@ -46,6 +47,15 @@ class ItineraryViewSet(viewsets.ModelViewSet):
     serializer_class = ItinerarySerializer
 
 
-class LocationViewSet(viewsets.ModelViewSet):
+class LocationDetailsViewSet(viewsets.ModelViewSet):
     queryset = LocationDetails.objects.all()
     serializer_class = LocationDetailSerializer
+
+class HistoricalInfoViewSet(viewsets.ModelViewSet):
+    queryset = HistoricalInfo.objects.all()
+    serializer_class = HistoricalInfoSerializer
+
+class NotIncludedItemViewSet(viewsets.ModelViewSet):
+    queryset = NotIncludedItem.objects.all()
+    serializer_class = NotIncludedItemSerializer
+
