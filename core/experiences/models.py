@@ -1,109 +1,135 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class TourGuide(models.Model):
-    name = models.CharField(max_length=255)
-    bio = models.TextField(blank=True)
-    contact = models.CharField(max_length=255)
-    photo = models.ImageField(upload_to="guides/", null=True, blank=True)
+    name = models.CharField(max_length=100)
+    bio = models.TextField()
+    image = models.ImageField(upload_to='guides/', blank=True)
 
     def __str__(self):
         return self.name
+
 
 
 class Experience(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=200)
+    place_name = models.CharField(max_length=200,null=True,blank=True)
+    main_image = models.ImageField(upload_to='experiences/',null=True,blank=True)
     description = models.TextField()
-    location = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='experiences/')
-    price_in_sats = models.PositiveIntegerField()
-    duration_days = models.IntegerField()
-    things_to_bring = models.TextField()
     guide = models.ForeignKey(TourGuide, on_delete=models.SET_NULL, null=True, related_name='experiences')
+    duration_days = models.PositiveIntegerField(null=True, blank=True)
+    duration_nights = models.PositiveIntegerField(null=True, blank=True)
+    base_price_per_person = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_reverse_season = models.BooleanField(default=False)
+    season_note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.place_name})"
 
-    def total_cost(self):
-        base_price = self.price_in_sats
-        room_total = sum([
-            room.price_in_sats
-            for acc in self.accommodation.all()
-            for room in acc.rooms.all()
-        ])
-        meal_total = self.meal_plan.total_meal_cost() if hasattr(self, 'meal_plan') else 0
-        service_fee = self.service_charge.amount_in_sats if hasattr(self, 'service_charge') else 0
-        return base_price + room_total + meal_total + service_fee
 
-    def cost_breakdown(self):
-        room_total = sum([
-            room.price_in_sats
-            for acc in self.accommodation.all()
-            for room in acc.rooms.all()
-        ])
-        meal_total = self.meal_plan.total_meal_cost() if hasattr(self, 'meal_plan') else 0
 
-        return {
-            "tour": self.price_in_sats,
-            "rooms": room_total,
-            "meals": meal_total,
-            "total": self.price_in_sats + room_total + meal_total
-        }
+class TripBatch(models.Model):
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='trip_batches')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    price_per_person = models.DecimalField(max_digits=10, decimal_places=2)
+    total_rooms = models.PositiveIntegerField()
+    rooms_booked = models.PositiveIntegerField(default=0)
+
+    @property
+    def rooms_available(self):
+        return self.total_rooms - self.rooms_booked
+
+    @property
+    def is_sold_out(self):
+        return self.rooms_available <= 0
+
+    def __str__(self):
+        return f"{self.experience.title} Trip ({self.start_date} to {self.end_date})"
+
 
 
 class Itinerary(models.Model):
-    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='itinerary')
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='itineraries')
     day_number = models.PositiveIntegerField()
-    activity_title = models.CharField(max_length=255)
+    title = models.CharField(max_length=200, blank=True)
     description = models.TextField()
-
-    class Meta:
-        ordering = ['day_number']
+    image = models.ImageField(upload_to='itineraries/',null=True,blank=True)
+    meal_included = models.BooleanField(default=False)
+    meal_description = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
-        return f"Day {self.day_number}: {self.activity_title}"
+        return f"Day {self.day_number} - {self.title}"
+
 
 
 class Accommodation(models.Model):
-    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='accommodation')
-    name = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='accommodations')
+    name = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='accommodations/', null=True, blank=True)
+    image1 = models.ImageField(upload_to='accommodations/', null=True, blank=True)
+    image2 = models.ImageField(upload_to='accommodations/', blank=True, null=True)
+    image3 = models.ImageField(upload_to='accommodations/', blank=True, null=True)
+    image4 = models.ImageField(upload_to='accommodations/', blank=True, null=True)
 
     def __str__(self):
         return self.name
 
 
-class Room(models.Model):
-    accommodation = models.ForeignKey(Accommodation, on_delete=models.CASCADE, related_name='rooms')
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    capacity = models.PositiveIntegerField()
-    quantity_available = models.PositiveIntegerField()
-    price_in_sats = models.PositiveIntegerField()
-    image = models.ImageField(upload_to='rooms/', null=True, blank=True)
+# ✅ Inclusions & Exclusions
+class IncludedItem(models.Model):
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='included_items')
+    text = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.name} ({self.accommodation.name})"
+        return f"Included: {self.text}"
 
 
-class MealPlan(models.Model):
-    experience = models.OneToOneField(Experience, on_delete=models.CASCADE, related_name='meal_plan')
-    meal_description = models.TextField(help_text="e.g. Breakfast and Lunch provided daily")
-    price_per_day_in_sats = models.PositiveIntegerField()
-    included_in_package = models.BooleanField(default=True)  # Frontend can use this to hide pricing
+class NotIncludedItem(models.Model):
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='not_included_items')
+    text = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"Meal Plan for {self.experience.title}"
-
-    def total_meal_cost(self):
-        return self.experience.duration_days * self.price_per_day_in_sats
+        return f"Not Included: {self.text}"
 
 
-class ServiceCharge(models.Model):
-    experience = models.OneToOneField(Experience, on_delete=models.CASCADE, related_name='service_charge')
-    amount_in_sats = models.PositiveIntegerField()
+
+class Recommendation(models.Model):
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='recommendations')
+    person_name = models.CharField(max_length=100)
+    message = models.TextField()
 
     def __str__(self):
-        return f"Service charge for {self.experience.title}"
+        return f"{self.person_name}'s Recommendation"
+
+
+
+class HistoricalInfo(models.Model):
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='histories')
+    content = models.TextField()
+
+    def __str__(self):
+        return f"History of {self.experience.place_name}"
+
+
+class LocationDetails(models.Model):
+    experience = models.OneToOneField(Experience, on_delete=models.CASCADE, related_name='location_details')
+    map_image = models.ImageField(upload_to='locations/')
+    best_time_to_visit = models.TextField()
+    weather_info = models.TextField()
+
+    def __str__(self):
+        return f"Location Details for {self.experience.place_name}"
+
+
+# 🧾 Booking logic
+# class Booking(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     trip_batch = models.ForeignKey(TripBatch, on_delete=models.CASCADE)
+#     number_of_people = models.PositiveIntegerField()
+#     payment_status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('paid', 'Paid')])
+#     booked_on = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self):
+#         return f"Booking for {self.user.username} on {self.trip_batch}"
