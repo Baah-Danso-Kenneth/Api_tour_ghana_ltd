@@ -66,12 +66,10 @@ class Itinerary(models.Model):
 
 class Accommodation(models.Model):
     experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='accommodations')
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField()
-    image1 = models.ImageField(upload_to='accommodations/', null=True, blank=True)
-    image2 = models.ImageField(upload_to='accommodations/', blank=True, null=True)
-    image3 = models.ImageField(upload_to='accommodations/', blank=True, null=True)
-    image4 = models.ImageField(upload_to='accommodations/', blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True, null=True)
+    image = models.ImageField(upload_to='accommodations/', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -133,3 +131,13 @@ class LocationDetails(models.Model):
 #
 #     def __str__(self):
 #         return f"Booking for {self.user.username} on {self.trip_batch}"
+
+
+class MapAndContent(models.Model):
+    experience = models.OneToOneField(Experience, on_delete=models.CASCADE, related_name='map_details', null=True)
+    region_map = models.ImageField(upload_to='maps/', blank=True, null=True)
+    best_time_title = models.CharField(max_length=30, blank=True, null=True)
+    best_time_des = models.TextField(blank=True, null=True)
+
+    weather_title = models.CharField(max_length=30, blank=True, null=True)
+    weather_time_des = models.TextField(blank=True, null=True)

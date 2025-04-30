@@ -3,13 +3,13 @@ from .serializer import (ExperienceSerializer, ExperienceDetailSerializer,
                          NotIncludedItemSerializer, IncludedItemSerializer,
                          TourGuideSerializer, TripBatchSerializer,AccommodationSerializer,
                           RecommendationSerializer, LocationDetailSerializer, ItinerarySerializer,
-                          HistoricalInfoSerializer
+                          HistoricalInfoSerializer, MapAndContentSerializer
                          )
 
 from .models import (Experience, NotIncludedItem,
                      TourGuide, HistoricalInfo,
                      Recommendation, Itinerary,Accommodation,
-                     IncludedItem, TripBatch, LocationDetails)
+                     IncludedItem, TripBatch, LocationDetails, MapAndContent)
 
 class ExperienceViewSet(viewsets.ModelViewSet):
     queryset = Experience.objects.all()
@@ -59,3 +59,7 @@ class NotIncludedItemViewSet(viewsets.ModelViewSet):
     queryset = NotIncludedItem.objects.all()
     serializer_class = NotIncludedItemSerializer
 
+
+class MapContentViewSet(viewsets.ModelViewSet):
+    queryset = MapAndContent.objects.all()
+    serializer_class = MapAndContentSerializer

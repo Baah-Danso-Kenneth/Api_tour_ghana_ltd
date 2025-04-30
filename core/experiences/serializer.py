@@ -1,61 +1,63 @@
 from .models import (Experience, Accommodation,
                      TripBatch, TourGuide, Itinerary,
                      IncludedItem, NotIncludedItem, HistoricalInfo,
-                     Recommendation, LocationDetails)
+                     Recommendation, LocationDetails, MapAndContent)
 from rest_framework import serializers
 
+# Define TourGuideSerializer first
+class TourGuideSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourGuide
+        fields = ['name', 'bio', 'image']
+
+# Now you can safely reference TourGuideSerializer in other serializers
+class ExperienceSerializer(serializers.ModelSerializer):
+    guide = TourGuideSerializer(read_only=True)
+    class Meta:
+        model = Experience
+        fields = '__all__'
 
 class IncludedItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model= IncludedItem
+        model = IncludedItem
         fields = '__all__'
-
 
 class NotIncludedItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model= NotIncludedItem
+        model = NotIncludedItem
         fields = '__all__'
 
-
-class TourGuideSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= TourGuide
-        fields = ['name', 'bio','image']
-
 class RecommendationSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
     class Meta:
-        model= Recommendation
+        model = Recommendation
         fields = '__all__'
 
 class TripBatchSerializer(serializers.ModelSerializer):
     class Meta:
-        model= TripBatch
+        model = TripBatch
         fields = '__all__'
 
 class AccommodationSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
     class Meta:
-        model= Accommodation
+        model = Accommodation
         fields = '__all__'
 
 class ItinerarySerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
     class Meta:
-        model= Itinerary
-        fields = ['__all__']
+        model = Itinerary
+        fields = '__all__'
 
 class HistoricalInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model= HistoricalInfo
+        model = HistoricalInfo
         fields = '__all__'
 
 class LocationDetailSerializer(serializers.ModelSerializer):
     class Meta:
-        model= LocationDetails
-        fields = '__all__'
-
-
-class ExperienceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= Experience
+        model = LocationDetails
         fields = '__all__'
 
 class ExperienceDetailSerializer(serializers.ModelSerializer):
@@ -65,7 +67,15 @@ class ExperienceDetailSerializer(serializers.ModelSerializer):
     not_included_items = NotIncludedItemSerializer(many=True, read_only=True)
     trip_batches = TripBatchSerializer(many=True, read_only=True)
     location_details = LocationDetailSerializer(many=True, read_only=True)
+    guide = TourGuideSerializer(read_only=True)
 
     class Meta:
         model = Experience
+        fields = '__all__'
+
+
+class MapAndContentSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
+    class Meta:
+        model = MapAndContent
         fields = '__all__'
