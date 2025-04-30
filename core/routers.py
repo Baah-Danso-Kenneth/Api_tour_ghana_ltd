@@ -3,7 +3,7 @@ from rest_framework import routers
 from core.auth.viewsets.login import LoginViewSet
 from core.auth.viewsets.refresh import RefreshViewSet
 from core.auth.viewsets.register import RegisterViewSet
-from core.experiences.viewsets import TourGuideViewSet
+from core.experiences.viewsets import TourGuideViewSet, MapContentViewSet
 from core.payments.viewsets import LightningPaymentViewset, OrderViewSet
 from core.shops.viewsets import ProductViewSet
 from core.users.viewsets import UserViewSet
@@ -34,6 +34,7 @@ router.register('not-included-items', NotIncludedItemViewSet, basename='not-incl
 router.register('recommendations', RecommendationViewSet, basename='recommendations')
 router.register('histories', HistoricalInfoViewSet, basename='history')
 router.register('location-details', LocationDetailsViewSet, basename='location-details')
+router.register('map-content',MapContentViewSet, basename='map-content')
 
 #Shop
 router.register(r'products', ProductViewSet, basename='product')

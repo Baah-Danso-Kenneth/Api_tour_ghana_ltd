@@ -1,7 +1,7 @@
 from .models import (Experience, Accommodation,
                      TripBatch, TourGuide, Itinerary,
                      IncludedItem, NotIncludedItem, HistoricalInfo,
-                     Recommendation, LocationDetails)
+                     Recommendation, LocationDetails, MapAndContent)
 from rest_framework import serializers
 
 # Define TourGuideSerializer first
@@ -39,6 +39,7 @@ class TripBatchSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AccommodationSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
     class Meta:
         model = Accommodation
         fields = '__all__'
@@ -70,4 +71,11 @@ class ExperienceDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Experience
+        fields = '__all__'
+
+
+class MapAndContentSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
+    class Meta:
+        model = MapAndContent
         fields = '__all__'
