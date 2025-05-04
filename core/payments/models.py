@@ -4,7 +4,10 @@ from core.shops.models import Product
 class LightningPayment(models.Model):
     invoice_id = models.CharField(max_length=255, unique=True)
     amount_in_sats = models.PositiveIntegerField()
+    payment_request = models.TextField(blank=True, null=True)
+    r_hash = models.CharField(max_length=100, blank=True, null=True)
     paid = models.BooleanField(default=False)
+    payment_type = models.CharField(max_length=50, default="lightning")
     created_at = models.DateTimeField(auto_now_add=True)
     paid_at = models.DateTimeField(null=True, blank=True)
 
