@@ -1,14 +1,14 @@
-import os
+# lnd_utils.py
+
 import grpc
 import codecs
-
+import os
 import lightning_pb2 as ln
-import  lightning_pb2_grpc as lnrpc
+import lightning_pb2_grpc as lnrpc
 
 LND_DIR = os.path.expanduser("~/.lnd")
 CERT_PATH = os.path.join(LND_DIR, "tls.cert")
 MACAROON_PATH = os.path.join(LND_DIR, "data/chain/bitcoin/regtest/admin.macaroon")
-
 
 with open(CERT_PATH, 'rb') as f:
     cert = f.read()
@@ -17,7 +17,6 @@ credentials = grpc.ssl_channel_credentials(cert)
 with open(MACAROON_PATH, 'rb') as f:
     macaroon_bytes = f.read()
 macaroon = codecs.encode(macaroon_bytes, 'hex')
-
 
 class MacaroonAuth(grpc.AuthMetadataPlugin):
     def __call__(self, context, callback):
@@ -29,6 +28,10 @@ combined_creds = grpc.composite_channel_credentials(credentials, auth_credential
 channel = grpc.secure_channel('localhost:10009', combined_creds)
 stub = lnrpc.LightningStub(channel)
 
-if __name__ == '__main__':
-    info = stub.GetInfo(ln.GetInfoRequest())
-    print(info)
+def create_invoice(amount_sats, memo="Order Payment"):
+    invoice = ln.Invoice(value=amount_sats, memo=memo)
+    response = stub.AddInvoice(invoice)
+    return {
+        "payment_request": response.payment_request,
+        "r_hash": response.r_hash.hex()
+    }
