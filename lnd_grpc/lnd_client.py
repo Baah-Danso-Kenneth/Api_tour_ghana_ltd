@@ -3,8 +3,9 @@
 import grpc
 import codecs
 import os
-import lightning_pb2 as ln
-import lightning_pb2_grpc as lnrpc
+from lnd_grpc import lightning_pb2 as ln
+from lnd_grpc import lightning_pb2_grpc as lnrpc
+
 
 LND_DIR = os.path.expanduser("~/.lnd")
 CERT_PATH = os.path.join(LND_DIR, "tls.cert")
@@ -35,3 +36,8 @@ def create_invoice(amount_sats, memo="Order Payment"):
         "payment_request": response.payment_request,
         "r_hash": response.r_hash.hex()
     }
+
+if __name__ == "__main__":
+    result = create_invoice(amount_sats=50, memo="From the top")
+    print("Invoice created")
+    print(result)
