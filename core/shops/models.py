@@ -32,4 +32,4 @@ class ProductImage(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return f"Image for {self.product.name} - Image {self.order}"
+        return f"Image for {self.product.name}"
