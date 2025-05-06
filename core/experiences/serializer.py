@@ -18,11 +18,13 @@ class ExperienceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class IncludedItemSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
     class Meta:
         model = IncludedItem
         fields = '__all__'
 
 class NotIncludedItemSerializer(serializers.ModelSerializer):
+    experience = ExperienceSerializer(read_only=True)
     class Meta:
         model = NotIncludedItem
         fields = '__all__'

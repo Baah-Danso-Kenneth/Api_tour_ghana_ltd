@@ -4,8 +4,8 @@ from core.auth.viewsets.login import LoginViewSet
 from core.auth.viewsets.refresh import RefreshViewSet
 from core.auth.viewsets.register import RegisterViewSet
 from core.experiences.viewsets import TourGuideViewSet, MapContentViewSet
-from core.payments.viewsets import LightningPaymentViewset, OrderViewSet
-from core.shops.viewsets import ProductViewSet
+from core.payments.viewsets import LightningPaymentViewSet, OrderViewSet
+from core.shops.viewsets import ProductViewSet, ProductCategoryViewSet, ProductImageViewSet
 from core.users.viewsets import UserViewSet
 from .experiences.viewsets import ( ExperienceViewSet, RecommendationViewSet,
                                     ItineraryViewSet, TourGuideViewSet, LocationDetailsViewSet,
@@ -38,9 +38,11 @@ router.register('map-content',MapContentViewSet, basename='map-content')
 
 #Shop
 router.register(r'products', ProductViewSet, basename='product')
+router.register(r'detail-products', ProductImageViewSet, basename='product-detail')
+router.register(r'categories', ProductCategoryViewSet, basename='categories')
 
 #Payments
-router.register(r'lightning-payments', LightningPaymentViewset, basename='lightning-payment')
+router.register(r'lightning-payments', LightningPaymentViewSet, basename='lightning-payment')
 router.register(r'orders', OrderViewSet, basename='orders')
 
 urlpatterns = [

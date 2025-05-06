@@ -25,7 +25,7 @@ class Experience(models.Model):
     season_note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.title} ({self.place_name})"
+        return f"{self.title}"
 
 
 
@@ -141,3 +141,6 @@ class MapAndContent(models.Model):
 
     weather_title = models.CharField(max_length=30, blank=True, null=True)
     weather_time_des = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.best_time_title}"
