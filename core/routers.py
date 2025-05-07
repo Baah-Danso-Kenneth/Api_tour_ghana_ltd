@@ -1,5 +1,5 @@
 from rest_framework import routers
-
+from django.urls import path
 from core.auth.viewsets.login import LoginViewSet
 from core.auth.viewsets.refresh import RefreshViewSet
 from core.auth.viewsets.register import RegisterViewSet
@@ -12,6 +12,8 @@ from .experiences.viewsets import ( ExperienceViewSet, RecommendationViewSet,
                                     TripBatchViewSet, HistoricalInfoViewSet, AccommodationViewSet,
                                     IncludedItemViewSet, NotIncludedItemViewSet,
                                     )
+from core.payments.views import GenerateInvoiceView
+from core.payments.webhook import lightning_webhook
 
 router = routers.SimpleRouter()
 
@@ -47,4 +49,6 @@ router.register(r'orders', OrderViewSet, basename='orders')
 
 urlpatterns = [
     *router.urls,
+    path('lightning-webhook/', lightning_webhook, name='lightning-webhook'),
+    path('generate-invoice/', GenerateInvoiceView.as_view(), name='generate-invoice')
 ]
