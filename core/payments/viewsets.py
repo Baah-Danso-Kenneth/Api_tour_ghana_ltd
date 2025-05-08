@@ -19,7 +19,7 @@ class HashLightningAPIKey(BasePermission):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    permission_classes = [HashLightningAPIKey]
+    # permission_classes = [HashLightningAPIKey]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 

@@ -2,7 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from lnd_grpc.lnd_client import create_invoice
-from .models import LightningPayment
+from .models import LightningPayment, Order
+from .service import handle_payment_confirmation
+from rest_framework.permissions import AllowAny
+import requests
+
 
 class GenerateInvoiceView(APIView):
     def post(self, request):
@@ -33,3 +37,50 @@ class GenerateInvoiceView(APIView):
             "payment_request": lightning_payment.payment_request,
             "r_hash": lightning_payment.r_hash
         })
+
+
+class CreateOrderInvoiceView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        product_id = request.data.get("product_id")
+        quantity = int(request.data.get("quantity", 1))
+
+        product = get_object_or_404(Product, id=product_id)
+
+        if product.stock_quantity < quantity:
+            return Response({"error": "Not enough stock."}, status=400)
+
+        total_amount = product.price_in_sats * quantity
+
+        # Generate invoice from helper
+        invoice_data = create_invoice(amount_sats=total_amount, memo="Order Payment")
+
+        # Save Lightning payment
+        payment = LightningPayment.objects.create(
+            r_hash=invoice_data["r_hash"],
+            payment_request=invoice_data["payment_request"],
+            amount=total_amount,
+        )
+
+        # Create the order
+        order = Order.objects.create(
+            product=product,
+            quantity=quantity,
+            total_amount_sats=total_amount,
+            payment=payment
+        )
+
+        return Response({
+            "order_id": order.id,
+            "payment_request": payment.payment_request
+        }, status=201)
+
+
+class PaymentConfirmationView(APIView):
+    def post(self, request):
+        r_hash = request.data.get("r_hash")  # r_hash is received from the payment system
+        if not r_hash:
+            return Response({"error": "Missing r_hash"}, status=400)
+
+        handle_payment_confirmation(r_hash)
+        return Response({"message": "Payment processed"}, status=200)
