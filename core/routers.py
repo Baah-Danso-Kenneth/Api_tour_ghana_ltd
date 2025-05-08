@@ -12,7 +12,7 @@ from .experiences.viewsets import ( ExperienceViewSet, RecommendationViewSet,
                                     TripBatchViewSet, HistoricalInfoViewSet, AccommodationViewSet,
                                     IncludedItemViewSet, NotIncludedItemViewSet,
                                     )
-from core.payments.views import GenerateInvoiceView
+from core.payments.views import GenerateInvoiceView, PaymentConfirmationView, CreateOrderInvoiceView
 from core.payments.webhook import lightning_webhook
 
 router = routers.SimpleRouter()
@@ -50,5 +50,7 @@ router.register(r'orders', OrderViewSet, basename='orders')
 urlpatterns = [
     *router.urls,
     path('lightning-webhook/', lightning_webhook, name='lightning-webhook'),
-    path('generate-invoice/', GenerateInvoiceView.as_view(), name='generate-invoice')
+    path('generate-invoice/', GenerateInvoiceView.as_view(), name='generate-invoice'),
+    path('create-order-invoice/', CreateOrderInvoiceView.as_view(), name='create-order-invoice'),
+    path('payment-confirmation/', PaymentConfirmationView.as_view(), name='payment-confirmation')
 ]
