@@ -40,7 +40,13 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         payment_data = validated_data.pop('payment')
 
-        invoice_data = create_invoice(payment_data['amount_in_sats'])
+        memo = f"Purchase of product #{validated_data.get('product')} x{validated_data.get('quantity')}"
+        invoice_data = create_invoice(
+            amount_sats= create_invoice(
+                amount_sats=payment_data['amount_in_sats'],
+                memo=memo
+            )
+        )
 
         lightning_payment = LightningPayment.objects.create(
             invoice_id=invoice_data['r_hash'],
