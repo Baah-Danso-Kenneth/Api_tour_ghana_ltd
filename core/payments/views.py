@@ -5,6 +5,8 @@ from lnd_grpc.lnd_client import create_invoice
 from .models import LightningPayment, Order
 from .service import handle_payment_confirmation
 from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
+from .models import Product
 import requests
 
 
@@ -54,12 +56,17 @@ class CreateOrderInvoiceView(APIView):
 
         # Generate invoice from helper
         invoice_data = create_invoice(amount_sats=total_amount, memo="Order Payment")
+        invoice_id = invoice_data.get("r_hash")
+
+        if not invoice_id:
+            return Response({"error": "Invoice generation failed"}, status=500)
 
         # Save Lightning payment
         payment = LightningPayment.objects.create(
             r_hash=invoice_data["r_hash"],
+            invoice_id=invoice_id,
             payment_request=invoice_data["payment_request"],
-            amount=total_amount,
+            amount_in_sats=total_amount,
         )
 
         # Create the order
